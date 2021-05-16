@@ -142,7 +142,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "websocket", "static"),
+    os.path.join(BASE_DIR, "lands", "static"),
 ]
 
 STATIC_ROOT = 'static_root'
