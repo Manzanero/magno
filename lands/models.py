@@ -4,7 +4,7 @@ from django.db import models
 
 class WorldProperty(models.Model):
     player = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, default=None)
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=255)
     value = models.TextField()
 
     class Meta:
@@ -15,7 +15,7 @@ class WorldProperty(models.Model):
 
 
 class Land(models.Model):
-    name = models.SlugField(max_length=256, unique=True)
+    name = models.SlugField(max_length=255, unique=True)
     info = models.TextField()
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -27,7 +27,7 @@ class Land(models.Model):
 class LandProperty(models.Model):
     land = models.ForeignKey(Land, on_delete=models.CASCADE, related_name='land_properties')
     player = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, default=None, related_name='land_properties')
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=255)
     value = models.TextField()
 
     class Meta:
@@ -39,7 +39,7 @@ class LandProperty(models.Model):
 
 class Realm(models.Model):
     land = models.ForeignKey(Land, on_delete=models.CASCADE, null=True, blank=True, default=None, related_name='realms')
-    name = models.SlugField(max_length=256, unique=True)
+    name = models.SlugField(max_length=255, unique=True)
     info = models.TextField()
     host = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, default=None, related_name='hosts')
     players = models.ManyToManyField(User, blank=True, default=None, related_name='plays')
@@ -53,7 +53,7 @@ class Realm(models.Model):
 class RealmProperty(models.Model):
     realm = models.ForeignKey(Realm, on_delete=models.CASCADE, related_name='realm_properties')
     player = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, default=None, related_name='realm_properties')
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=255)
     value = models.TextField()
 
     class Meta:
@@ -66,7 +66,7 @@ class RealmProperty(models.Model):
 class Message(models.Model):
     realm = models.ForeignKey(Realm, on_delete=models.CASCADE, related_name='messages')
     player = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, default=None, related_name='messages')
-    topic = models.SlugField(max_length=256, null=True, blank=True, default=None)
+    topic = models.SlugField(max_length=255, null=True, blank=True, default=None)
     payload = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
 
