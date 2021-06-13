@@ -1,7 +1,11 @@
 import base64
+from json import JSONDecodeError
 
 from django.contrib.auth.models import User
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
+from django.views.decorators.csrf import csrf_exempt
+
+from utils.exceptions import get_stacktrace_str
 
 
 def authenticate(username=None, password=None):
@@ -47,5 +51,24 @@ def redirect_preflight(view):
         response['Access-Control-Allow-Credentials'] = "true"
         response['Access-Control-Allow-Headers'] = "Authorization, content-type"
         return response
+
+    return wrapper
+
+
+def api_response(view):
+    @csrf_exempt
+    @redirect_preflight
+    @require_basic_auth
+    def wrapper(request, *args, **kwargs):
+        try:
+            response = view(request, *args, **kwargs)
+            status = {'GET': 200, 'POST': 200, 'PUT': 201, 'DELETE': 204}[request.method]
+            return JsonResponse(response, safe=False, status=status)
+        except Http404 as e:
+            return JsonResponse({'message': f'{e}'}, safe=False, status=404)
+        except JSONDecodeError as e:
+            return JsonResponse({'message': f'JSONDecodeError: {e}'}, safe=False, status=400)
+        except Exception as e:
+            return JsonResponse({'message': get_stacktrace_str(e)}, safe=False, status=500)
 
     return wrapper
