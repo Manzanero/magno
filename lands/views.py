@@ -13,11 +13,11 @@ from utils.decorators import api_response
 from utils.time_ops import to_datetime_iso
 
 
-def land(request, land_name):
+def land_view(request, land_name):
     return render(request, 'lands/index.html', {'land_name': land_name, 'base_url': settings.BASE_URL})
 
 
-@require_http_methods(["PUT"])
+@require_http_methods(["POST", "PUT"])
 @api_response
 def create_land(request):
     data = json.loads(request.body.decode('utf-8'))
@@ -68,7 +68,7 @@ def delete_land(request, land_name):
     }
 
 
-@require_http_methods(["PUT"])
+@require_http_methods(["POST", "PUT"])
 @api_response
 def create_realm(request, land_name):
     land = get_object_or_404(Land, name=land_name)
@@ -78,17 +78,11 @@ def create_realm(request, land_name):
     try:
         Realm.objects.create(land=land, name=realm_name, info=json.dumps(realm_info), host=request.user)
         message = f'Realm (name={realm_name}) created'
-        created = True
-        exists = True
     except IntegrityError:
-        message = f'Realm (name={realm_name}) already exist'
-        created = False
-        exists = True
+        raise AssertionError(f'Realm (name={realm_name}) already exist')
 
     return {
         'message': message,
-        'created': created,
-        'exists': exists,
     }
 
 
@@ -100,9 +94,9 @@ def get_realm(request, land_name, realm_name):
 
     return {
         'message': f'Realm (name={realm_name}) loaded',
-        'name': realm.name,
         'info': json.loads(realm.info),
-        'land': land.name,
+        'players': [x.username for x in realm.players.all()],
+        'host': realm.host.username,
     }
 
 
@@ -176,8 +170,8 @@ def set_realm_properties(request, land_name, realm_name, property_name):
     realm = get_object_or_404(Realm, land=land, name=realm_name)
 
     data = json.loads(request.body.decode('utf-8'))
-    players = data.get('players', [])
-    values = data.get('values', [])
+    players = data.get('players')
+    values = data.get('values', [data.get('value', '')])
 
     if players:
         users = User.objects.filter(username__in=players)
@@ -211,7 +205,7 @@ def delete_realm(request, land_name, realm_name):
     }
 
 
-@require_http_methods(["PUT"])
+@require_http_methods(["POST", "PUT"])
 @api_response
 def publish_messages(request, land_name, realm_name):
     land = get_object_or_404(Land, name=land_name)

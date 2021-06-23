@@ -4,7 +4,7 @@ from . import views
 
 urlpatterns = [
     path('create', views.create_land, name='create_land'),
-    path('<str:land_name>', views.land, name='land'),
+    path('<str:land_name>', views.land_view, name='land'),
     path('<str:land_name>/info', views.get_land, name='get_land'),
     path('<str:land_name>/delete', views.delete_land, name='delete_land'),
     path('<str:land_name>/realms/create', views.create_realm, name='create_realm'),

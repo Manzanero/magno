@@ -39,12 +39,15 @@ class LandProperty(models.Model):
 
 class Realm(models.Model):
     land = models.ForeignKey(Land, on_delete=models.CASCADE, null=True, blank=True, default=None, related_name='realms')
-    name = models.SlugField(max_length=255, unique=True)
+    name = models.SlugField(max_length=255)
     info = models.TextField()
     host = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, default=None, related_name='hosts')
     players = models.ManyToManyField(User, blank=True, default=None, related_name='plays')
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['land', 'name']
 
     def __str__(self):
         return self.name
